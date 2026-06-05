@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NYC DOE CDOS Graduation Pathways Flowchart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              foreground: { 100:'#fffbf8',150:'#f8f4f1',200:'#efeae7',250:'#e2ddd9',300:'#cfc9c5',350:'#b3ada8',400:'#98918b',450:'#746d68',550:'#635c57',600:'#5a544f',650:'#4c4642',700:'#3f3935',750:'#322d29',800:'#272320',850:'#1d1a17',900:'#14110e' },
+              background: { 100:'#fffbf8',150:'#f8f4f1',200:'#efeae7',250:'#e2ddd9',300:'#cfc9c5',350:'#b3ada8',400:'#98918b',450:'#746d68' },
+              accent: { 100:'#f5f8fd',150:'#eef4fe',200:'#dbeafe',250:'#c4dbfa',300:'#93b5ef',350:'#6e9be4',400:'#5489d6',450:'#3468b0',550:'#2b5899',600:'#244b83',650:'#1e3f6e',700:'#1a355e',750:'#152b4e',800:'#102140',850:'#0c1832',900:'#081025' },
+              stroke: { 100:'#fffbf8',150:'#fff3ea',200:'#f6e8dd',250:'#ebdbce',300:'#dac6b7',350:'#c1a996',400:'#a88c76',450:'#87674e',550:'#745740',600:'#6a4f39',650:'#59422f',700:'#493626' },
+              muted: { 100:'#fffbf8',150:'#fff3ea',200:'#f6e8dd',250:'#ebdbce',300:'#dac6b7',350:'#c1a996',400:'#a88c76',450:'#87674e',550:'#745740',600:'#6a4f39',650:'#59422f',700:'#493626',750:'#3a2a1e',800:'#2d2117',850:'#221811',900:'#17100a' },
+            },
+            fontFamily: { sans: ['Inter','sans-serif'] },
+          }
+        }
+      };
+    </script>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
+      .node-group { cursor: pointer; }
+      .node-group:hover .node-rect { filter: brightness(1.08); }
+      .node-group .node-rect { transition: filter 0.2s, stroke-width 0.2s; }
+      .node-highlight .node-rect { stroke: #facc15 !important; stroke-width: 4 !important; filter: drop-shadow(0 0 12px rgba(250,204,21,0.7)) !important; }
+      .node-reviewed .reviewed-badge { display: block !important; }
+      .search-match { animation: pulseGlow 1.5s ease-in-out infinite; }
+      @keyframes pulseGlow { 0%,100% { filter: drop-shadow(0 0 8px rgba(250,204,21,0.5)); } 50% { filter: drop-shadow(0 0 18px rgba(250,204,21,0.9)); } }
+      .tip-overlay { display: none; }
+      .tips-visible .tip-overlay { display: block; }
+      #sidebar { transition: transform 0.3s ease; transform: translateX(100%); }
+      #sidebar.sidebar-open { transform: translateX(0); }
+      .legend-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+      @media print {
+        #topbar, #sidebar, #zoom-controls, #bottom-bar { display: none !important; }
+        #chart-container { height: auto !important; overflow: visible !important; }
+        #flowchart-svg { width: 100% !important; height: auto !important; }
+      }
+      #flowchart-svg text { user-select: none; }
+      .filter-btn { transition: background 0.15s, color 0.15s; }
+      .filter-btn.active { font-weight: 600; }
+      .tooltip-box { position: fixed; pointer-events: none; z-index: 100; background: #fffbf8; border-radius: 12px; padding: 10px 14px; max-width: 320px; box-shadow: 0 8px 24px rgba(20,17,14,0.12); font-size: 13px; color: #272320; line-height: 1.5; opacity: 0; transition: opacity 0.15s; }
+      .tooltip-box.visible { opacity: 1; }
+      @media (max-width: 767px) {
+        #chart-container { display: none; }
+        #mobile-list { display: block !important; }
+        #zoom-controls { display: none !important; }
+      }
+      @media (min-width: 768px) {
+        #mobile-list { display: none !important; }
+      }
+      .dark-mode { background: #1a1a2e !important; color: #e2e2e2 !important; }
+      .dark-mode #topbar { background: #16213e !important; border-color: #2a2a4a !important; }
+      .dark-mode #sidebar { background: #16213e !important; color: #e2e2e2 !important; }
+      .dark-mode #bottom-bar { background: #16213e !important; border-color: #2a2a4a !important; }
+      .dark-mode .tooltip-box { background: #16213e !important; color: #e2e2e2 !important; }
+      .dark-mode #chart-container { background: #1a1a2e !important; }
+      .dark-mode #mobile-list { background: #1a1a2e !important; }
+      .dark-mode .mobile-card { background: #16213e !important; border-color: #2a2a4a !important; color: #e2e2e2 !important; }
+      .dark-mode footer { color: #888 !important; }
+      .supt-section { background: #fef2f2; border-radius: 12px; padding: 12px 14px; margin-top: 4px; border-left: 3px solid #8b0000; }
+      .supt-section h4 { font-size: 13px; font-weight: 700; color: #8b0000; margin: 0 0 6px 0; }
+      .supt-section p, .supt-section ul { font-size: 13px; color: #5a544f; margin: 0; line-height: 1.6; }
+      .supt-section ul { padding-left: 0; list-style: none; }
+      .supt-section ul li { margin-bottom: 4px; }
+      .sidebar-divider { height: 1px; background: #e2ddd9; margin: 0; }
+    </style>
+</head>
+<body data-id="0" class="bg-background-150 text-foreground-800">
+  <app-icon data-id="1" hidden data-icon="graduation-cap" data-palette="Blue"></app-icon>
+
+  <div data-id="2" id="tooltip" class="tooltip-box"></div>
+
+  <!-- TOP BAR -->
+  <header data-id="3" id="topbar" class="sticky top-0 z-50 bg-background-100 border-b border-stroke-200/30 px-4 md:px-6 py-2.5 flex flex-col gap-2">
+    <div data-id="4" class="flex items-center justify-between flex-wrap gap-2">
+      <div data-id="5" class="flex items-center gap-3 min-w-0">
+        <span data-id="6" class="text-2xl">🎓</span>
+        <div data-id="7" class="min-w-0">
+          <h1 data-id="8" class="text-base md:text-lg font-bold text-foreground-900 leading-tight truncate">NYC DOE CDOS Graduation Pathways</h1>
+          <p data-id="9" class="text-xs text-foreground-450 hidden sm:block">Interactive flowchart for guidance counselors • Click any node for details</p>
+        </div>
+      </div>
+      <div data-id="10" class="flex items-center gap-2 flex-shrink-0 flex-wrap">
+        <button data-id="11" id="dark-toggle" class="p-2 rounded-xl bg-background-200 hover:bg-background-250 text-foreground-600" title="Toggle Dark Mode"><i data-id="12" data-lucide="moon" class="w-4 h-4"></i></button>
+        <button data-id="13" id="tips-toggle" class="p-2 rounded-xl bg-background-200 hover:bg-background-250 text-foreground-600 text-xs font-medium flex items-center gap-1" title="Toggle Counselor Tips"><i data-id="14" data-lucide="lightbulb" class="w-4 h-4"></i><span data-id="15" class="hidden sm:inline">Tips</span></button>
+        <button data-id="16" id="print-btn" class="p-2 rounded-xl bg-background-200 hover:bg-background-250 text-foreground-600" title="Print"><i data-id="17" data-lucide="printer" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+    <div data-id="18" class="flex flex-col md:flex-row md:items-center gap-2">
+      <div data-id="19" class="relative flex-shrink-0 w-full md:w-56">
+        <i data-id="20" data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-foreground-400"></i>
+        <input data-id="21" id="search-input" type="text" placeholder="Search nodes…" class="w-full pl-9 pr-3 py-1.5 text-sm bg-background-200 rounded-xl border-none outline-none focus:bg-background-100 focus:ring-1 focus:ring-stroke-300/30" />
+      </div>
+      <div data-id="22" id="filter-bar" class="flex flex-wrap gap-1">
+        <button data-id="23" class="filter-btn active text-xs px-2.5 py-1 rounded-lg" data-filter="all" style="background:#efeae7;color:#272320;">All</button>
+        <button data-id="24" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="regents" style="background:#dbeafe;color:#2563eb;">Regents</button>
+        <button data-id="25" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="advanced" style="background:#ede9fe;color:#7c3aed;">Advanced</button>
+        <button data-id="26" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="local" style="background:#ccfbf1;color:#0d9488;">Local</button>
+        <button data-id="27" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="cte" style="background:#ffedd5;color:#ea580c;">CTE</button>
+        <button data-id="28" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="cdos" style="background:#fef3c7;color:#d97706;">CDOS</button>
+        <button data-id="29" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="ell" style="background:#dcfce7;color:#16a34a;">ELL</button>
+        <button data-id="30" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="swd" style="background:#f3e8ff;color:#9333ea;">SWD</button>
+        <button data-id="31" class="filter-btn text-xs px-2.5 py-1 rounded-lg" data-filter="appeals" style="background:#ffe4e6;color:#f43f5e;">Appeals</button>
+      </div>
+      <div data-id="32" class="hidden lg:flex items-center gap-3 ml-auto flex-shrink-0 text-xs text-foreground-600 flex-wrap">
+        <span data-id="33" class="flex items-center gap-1"><span data-id="34" class="legend-dot" style="background:#2563eb"></span>Regents</span>
+        <span data-id="35" class="flex items-center gap-1"><span data-id="36" class="legend-dot" style="background:#7c3aed"></span>Adv. Desig.</span>
+        <span data-id="37" class="flex items-center gap-1"><span data-id="38" class="legend-dot" style="background:#0d9488"></span>Local</span>
+        <span data-id="39" class="flex items-center gap-1"><span data-id="40" class="legend-dot" style="background:#ea580c"></span>CTE</span>
+        <span data-id="41" class="flex items-center gap-1"><span data-id="42" class="legend-dot" style="background:#d97706"></span>CDOS</span>
+        <span data-id="43" class="flex items-center gap-1"><span data-id="44" class="legend-dot" style="background:#dc2626"></span>Stand-Alone</span>
+        <span data-id="45" class="flex items-center gap-1"><span data-id="46" class="legend-dot" style="background:#16a34a"></span>ELL</span>
+        <span data-id="47" class="flex items-center gap-1"><span data-id="48" class="legend-dot" style="background:#9333ea"></span>SWD</span>
+        <span data-id="49" class="flex items-center gap-1"><span data-id="50" class="legend-dot" style="background:#f43f5e"></span>Appeals</span>
+        <span data-id="51" class="flex items-center gap-1"><span data-id="52" class="legend-dot" style="background:#991b1b"></span>Supt.</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ZOOM CONTROLS -->
+  <div data-id="53" id="zoom-controls" class="fixed bottom-20 right-4 z-40 flex flex-col gap-1.5 md:right-6">
+    <button data-id="54" id="zoom-in" class="w-10 h-10 flex items-center justify-center bg-background-100 rounded-xl shadow text-foreground-700 hover:bg-background-200"><i data-id="55" data-lucide="zoom-in" class="w-5 h-5"></i></button>
+    <button data-id="56" id="zoom-out" class="w-10 h-10 flex items-center justify-center bg-background-100 rounded-xl shadow text-foreground-700 hover:bg-background-200"><i data-id="57" data-lucide="zoom-out" class="w-5 h-5"></i></button>
+    <button data-id="58" id="zoom-fit" class="w-10 h-10 flex items-center justify-center bg-background-100 rounded-xl shadow text-foreground-700 hover:bg-background-200"><i data-id="59" data-lucide="maximize-2" class="w-5 h-5"></i></button>
+    <button data-id="60" id="zoom-reset" class="w-10 h-10 flex items-center justify-center bg-background-100 rounded-xl shadow text-foreground-700 hover:bg-background-200 text-xs font-bold">1:1</button>
+  </div>
+
+  <!-- MAIN CHART -->
+  <div data-id="61" id="chart-container" class="relative bg-background-150 overflow-hidden" style="height: calc(100vh - 120px);">
+    <svg data-id="62" id="flowchart-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 3200 2000">
+      <defs data-id="63">
+        <marker data-id="64" id="arrow-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="65" points="0 0, 10 3.5, 0 7" fill="#2563eb"/></marker>
+        <marker data-id="66" id="arrow-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="67" points="0 0, 10 3.5, 0 7" fill="#7c3aed"/></marker>
+        <marker data-id="68" id="arrow-teal" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="69" points="0 0, 10 3.5, 0 7" fill="#0d9488"/></marker>
+        <marker data-id="70" id="arrow-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="71" points="0 0, 10 3.5, 0 7" fill="#ea580c"/></marker>
+        <marker data-id="72" id="arrow-amber" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="73" points="0 0, 10 3.5, 0 7" fill="#d97706"/></marker>
+        <marker data-id="74" id="arrow-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="75" points="0 0, 10 3.5, 0 7" fill="#dc2626"/></marker>
+        <marker data-id="76" id="arrow-gray" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="77" points="0 0, 10 3.5, 0 7" fill="#6b7280"/></marker>
+        <marker data-id="78" id="arrow-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="79" points="0 0, 10 3.5, 0 7" fill="#16a34a"/></marker>
+        <marker data-id="80" id="arrow-swd" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="81" points="0 0, 10 3.5, 0 7" fill="#9333ea"/></marker>
+        <marker data-id="82" id="arrow-appeals" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="83" points="0 0, 10 3.5, 0 7" fill="#f43f5e"/></marker>
+        <marker data-id="84" id="arrow-dark" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="85" points="0 0, 10 3.5, 0 7" fill="#1e3a5f"/></marker>
+        <marker data-id="86" id="arrow-maroon" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="87" points="0 0, 10 3.5, 0 7" fill="#991b1b"/></marker>
+        <marker data-id="88" id="arrow-maroon-dash" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon data-id="89" points="0 0, 10 3.5, 0 7" fill="#8B0000"/></marker>
+        <filter data-id="90" id="shadow"><feDropShadow data-id="91" dx="0" dy="2" stdDeviation="3" flood-color="#14110e" flood-opacity="0.10"/></filter>
+      </defs>
+      <g data-id="92" id="svg-root">
+        <g data-id="93" id="connections-layer"></g>
+        <g data-id="94" id="nodes-layer"></g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- MOBILE LIST VIEW -->
+  <div data-id="95" id="mobile-list" class="hidden overflow-y-auto p-4 space-y-3" style="height: calc(100vh - 120px);"></div>
+
+  <!-- SIDEBAR -->
+  <aside data-id="96" id="sidebar" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-background-100 shadow-2xl z-50 flex flex-col overflow-hidden">
+    <div data-id="97" class="flex items-center justify-between p-4 border-b border-stroke-200/30">
+      <div data-id="98" class="flex items-center gap-2 min-w-0">
+        <span data-id="99" id="sidebar-icon" class="text-xl flex-shrink-0">📋</span>
+        <div data-id="100" class="min-w-0">
+          <h2 data-id="101" id="sidebar-title" class="text-base font-bold text-foreground-900 leading-tight truncate">Node Title</h2>
+          <span data-id="102" id="sidebar-badge" class="inline-block mt-0.5 text-xs font-medium px-2 py-0.5 rounded-full">Pathway</span>
+        </div>
+      </div>
+      <button data-id="103" id="sidebar-close" class="p-2 rounded-xl hover:bg-background-200 flex-shrink-0"><i data-id="104" data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div data-id="105" class="flex-1 overflow-y-auto p-5 space-y-4">
+      <div data-id="106">
+        <h3 data-id="107" class="text-xs font-semibold uppercase tracking-wider text-foreground-450 mb-2">Requirements</h3>
+        <ul data-id="108" id="sidebar-requirements" class="space-y-1.5 text-sm text-foreground-700"></ul>
+      </div>
+      <div data-id="109" class="sidebar-divider"></div>
+      <div data-id="110" class="bg-accent-100 rounded-2xl p-4">
+        <h3 data-id="111" class="text-xs font-semibold uppercase tracking-wider text-accent-600 mb-2 flex items-center gap-1">👩‍🏫 Counselor Responsibilities</h3>
+        <ul data-id="112" id="sidebar-counselor" class="space-y-1.5 text-sm text-foreground-700"></ul>
+      </div>
+      <div data-id="113" class="sidebar-divider"></div>
+      <div data-id="114" id="sidebar-supt-section" class="supt-section" style="display:none;">
+        <h4 data-id="115">🔴 Superintendent Determination</h4>
+        <div data-id="116" id="sidebar-supt-content"></div>
+      </div>
+      <div data-id="117" class="sidebar-divider"></div>
+      <div data-id="118">
+        <h3 data-id="119" class="text-xs font-semibold uppercase tracking-wider text-foreground-450 mb-1">Regulation</h3>
+        <p data-id="120" id="sidebar-regulation" class="text-sm text-foreground-600 font-medium"></p>
+      </div>
+      <div data-id="121">
+        <h3 data-id="122" class="text-xs font-semibold uppercase tracking-wider text-foreground-450 mb-1">Notes</h3>
+        <p data-id="123" id="sidebar-notes" class="text-sm text-foreground-600"></p>
+      </div>
+    </div>
+    <div data-id="124" class="p-4 border-t border-stroke-200/30">
+      <button data-id="125" id="mark-reviewed-btn" class="w-full py-2.5 rounded-xl bg-accent-450 text-white font-semibold text-sm hover:bg-accent-550 flex items-center justify-center gap-2"><i data-id="126" data-lucide="check-circle" class="w-4 h-4"></i> Mark as Reviewed</button>
+    </div>
+  </aside>
+
+  <!-- BOTTOM BAR -->
+  <div data-id="127" id="bottom-bar" class="fixed bottom-0 left-0 right-0 bg-background-100 border-t border-stroke-200/30 px-4 md:px-6 py-2 flex items-center gap-4 overflow-x-auto z-30 text-xs text-foreground-600">
+    <span data-id="128" class="font-semibold text-foreground-800 flex-shrink-0 flex items-center gap-1"><i data-id="129" data-lucide="clipboard-list" class="w-3.5 h-3.5"></i> Quick Ref:</span>
+    <span data-id="130" class="flex-shrink-0">📌 Gr.9 — Review IEP/504, assign pathway</span>
+    <span data-id="131" class="text-foreground-300">|</span>
+    <span data-id="132" class="flex-shrink-0">📌 Gr.10 — Credit audit (44 cr), CTE enrollment</span>
+    <span data-id="133" class="text-foreground-300">|</span>
+    <span data-id="134" class="flex-shrink-0">📌 Gr.11 — Regents prep, WBL hours</span>
+    <span data-id="135" class="text-foreground-300">|</span>
+    <span data-id="136" class="flex-shrink-0">📌 Gr.12 — Appeals, safety nets, credentials</span>
+    <span data-id="137" class="text-foreground-300">|</span>
+    <span data-id="138" class="flex-shrink-0">📌 Exit — Confirm diploma type & endorsements</span>
+  </div>
+
+  <footer data-id="139" class="hidden print:block py-4 text-center">
+    <p data-id="140" class="text-xs text-foreground-450">Made by Copilot</p>
+  </footer>
+
+  <script>
+  // ===== NODE DATA =====
+  const NODES = [
+    // TIER 0 — Entry
+    { id:'start', label:'Student Enters\nGrade 9', shortLabel:'Start: Grade 9', icon:'🎒', type:'Entry', tier:0, color:'#6b7280', textColor:'#fff', filter:'all',
+      x:1400, y:40, w:240, h:62, shape:'rounded',
+      requirements:['Review IEP/504 plan status','Check ELL/MNE identification','Review academic history & transcripts','Review attendance & behavior records'],
+      counselor:['Assign initial 4-year graduation plan (44 credits)','Discuss ALL pathway options with family','Schedule career interest inventory','Document pathway preferences in SIS','Set up 44-credit tracking dashboard'],
+      regulation:'CR 100.2, 100.4, NYC DOE Chancellor\'s Reg. A-501',
+      notes:'Every student should understand all available pathways before course selection. Early identification of SWD/ELL status is critical for appropriate planning. NYC DOE requires 44 credits for graduation.'
+    },
+    // TIER 1 — Credits
+    { id:'credits', label:'44-Credit Requirement\n(NYC DOE)', shortLabel:'44 Credits Required (NYC DOE)', icon:'📋', type:'Core Requirement', tier:1, color:'#1e3a5f', textColor:'#fff', filter:'all',
+      x:1400, y:170, w:240, h:62, shape:'rect',
+      requirements:['ELA: 8 credits (4 years)','Social Studies: 8 credits','Science: 6 credits','Mathematics: 6 credits (incl. 2 advanced)','Physical Education: 4 credits (every year)','Arts Education: 2 credits','Health: 2 credits','Electives: 8 credits','Total: 44 credits'],
+      counselor:['Track 44 NYC DOE credits each semester','Confirm PE participation every year','Verify at least 2 advanced math credits','Ensure arts requirement is 2 credits','Flag deficits at semester 4','Verify lab science requirements met','Monitor elective credit accumulation'],
+      regulation:'CR 100.5(a)(5), NYC DOE Chancellor\'s Reg. A-501',
+      notes:'NYC DOE requires 44 credits for all diploma types — double the NYS minimum of 22. The difference between diploma types lies in assessments passed and required passing scores. PE must be taken every year.'
+    },
+    // TIER 2 — Six Pathway Columns (spread across 3200px)
+    { id:'regents', label:'Regents Diploma\nPathway', shortLabel:'Regents Diploma', icon:'📘', type:'Pathway', tier:2, color:'#2563eb', textColor:'#fff', filter:'regents',
+      x:80, y:340, w:240, h:64, shape:'rect',
+      requirements:['44 credits completed (NYC DOE)','5 Regents exams each ≥65 (65 is passing):','  — ELA','  — Mathematics','  — Science','  — Social Studies','  — +1 Pathway exam','Pathway exam options: any Regents, CTE tech assessment, Arts assessment, or CDOS credential'],
+      counselor:['Confirm all 5 exams scheduled by junior year','Monitor scores as results come in','Initiate appeal process if score is 60–64','Verify +1 pathway exam is NYSED-approved','Review 4-year plan at mid-year each year','Track all 44 credits toward completion'],
+      regulation:'CR 100.5(a)(5)(i), NYC DOE A-501',
+      notes:'The standard diploma. 44 credits required under NYC DOE policy. The "+1" (fifth exam) can be satisfied through multiple pathway options, giving students flexibility.',
+      suptDetermination:'If the student has exhausted all Regents exam attempts and all available appeals without reaching the 65 threshold, the counselor may compile the full academic record and refer the case to the superintendent for a discretionary diploma determination.'
+    },
+    { id:'advanced', label:'Regents w/\nAdv. Designation', shortLabel:'Advanced Designation', icon:'🏅', type:'Pathway', tier:2, color:'#7c3aed', textColor:'#fff', filter:'advanced',
+      x:400, y:340, w:240, h:64, shape:'rect',
+      requirements:['Same 44 credits total (NYC DOE)','LOTE: 6 credits (or 2 with Arts/CTE endorsement)','3 Math Regents (Alg I + Geo + Alg II)','2 Science Regents (Living Env + 1 physical)','Optional Seals: Bilingual, STEM, Arts, CTE, Civic Readiness, Sustainability, Global Citizenship'],
+      counselor:['Verify advanced course sequence early','Track all 8+ Regents exams','Monitor seal eligibility criteria','Notify families of LOTE/CTE choice by Grade 10','Confirm Checkpoint B exam registration','Guide students toward applicable seals'],
+      regulation:'CR 100.5(a)(5)(ii), NYC DOE A-501',
+      notes:'Most rigorous diploma. 44 credits required. LOTE is 6 credits unless earning an Arts or CTE endorsement (then 2). Honors endorsement available with ≥90% average on all Regents. SWD may substitute other credits for LOTE.',
+      suptDetermination:'If the student cannot meet Advanced Designation requirements, they should first be considered for a standard Regents Diploma. If that is also unattainable after all options are exhausted, the counselor may refer to the superintendent.'
+    },
+    { id:'local', label:'Local Diploma\nPathway', shortLabel:'Local Diploma', icon:'📗', type:'Pathway', tier:2, color:'#0d9488', textColor:'#fff', filter:'local',
+      x:720, y:340, w:240, h:64, shape:'rect',
+      requirements:['44 credits completed (NYC DOE)','Requires at least one Regents score below 65 (via appeal or safety net)','OR with appeal: 65+ on 4, one 60–64 via appeal','OR with appeal + CDOS: 65+ on 3, two 60–64 via appeal + CDOS credential','SWD Safety Net: min score 55 on Regents'],
+      counselor:['Determine appeal eligibility for each student','File appeal paperwork with superintendent','Coordinate with department chairs','Track which safety nets apply (SWD vs. general)','Ensure all appeal documentation is complete','Verify all 44 NYC DOE credits earned'],
+      regulation:'CR 100.5(d)(7), 100.5(d)(10), NYC DOE A-501',
+      notes:'Available to all students through appeals. 44 credits required. SWD have additional safety nets allowing scores of 55-64. Multiple appeal options may be combined.',
+      suptDetermination:'If the student cannot meet Local Diploma standards even after the low-pass safety net (55–64), SWD appeal (52–54), and compensatory scoring are all exhausted, the counselor may refer the case to the superintendent for a discretionary diploma determination.'
+    },
+    { id:'cte', label:'CTE Pathway\n(+1 Pathway)', shortLabel:'CTE Pathway (+1)', icon:'🔧', type:'Pathway', tier:2, color:'#ea580c', textColor:'#fff', filter:'cte',
+      x:1040, y:340, w:240, h:64, shape:'rect',
+      requirements:['44 credits completed (NYC DOE)','Min 3.5 CTE credits (within electives)','4 Regents exams ≥65 (ELA, Math, Science, SS)','Complete NYSED-approved CTE program','Pass 3-part technical assessment','Exits with diploma + Technical Endorsement'],
+      counselor:['Confirm CTE program is NYSED-approved','Verify student has ≥3.5 CTE credits','Schedule all 3 parts of technical assessment','Add Technical Endorsement to transcript','Coordinate with CTE instructor','Track industry certification opportunities'],
+      regulation:'CR 100.5(d)(6)(i)(b), NYC DOE A-501',
+      notes:'The CTE pathway substitutes the 5th Regents exam with a rigorous 3-part technical assessment. 44 credits required; CTE credits (min 3.5) count within elective allocation. Students earn a Technical Endorsement.',
+      suptDetermination:'If the student completed all CTE coursework but cannot pass the 3-part technical assessment despite multiple attempts, the counselor documents all attempts and may refer the case to the superintendent.'
+    },
+    // CDOS Pathway — decision fork
+    { id:'cdos', label:'CDOS Pathway\n(+1) Decision', shortLabel:'CDOS Pathway (+1)', icon:'💼', type:'Decision', tier:2, color:'#d97706', textColor:'#fff', filter:'cdos',
+      x:1380, y:340, w:240, h:64, shape:'diamond',
+      requirements:['CDOS Credential serves as the +1 pathway assessment','Diploma type determined by Regents scores, NOT by CDOS','All 4 core Regents ≥ 65 → Regents Diploma + CDOS','Any core Regents < 65 (with appeal/safety net) → Local Diploma + CDOS','CDOS Option 1: Career Plan + 216 hrs CTE/WBL + Employability Profile','CDOS Option 2: Pass nationally-recognized work readiness assessment'],
+      counselor:['Determine which diploma branch applies based on Regents scores','Help student choose CDOS Option 1 or Option 2','Track 216-hour log for Option 1','Complete employability profile','Verify career plan documentation','Register for work readiness assessment if Option 2'],
+      regulation:'CR 100.6(b), NYC DOE A-501',
+      notes:'This is a decision point. The CDOS Credential serves as the +1 pathway assessment, but the diploma type (Regents vs. Local) is determined entirely by the student\'s Regents exam scores.',
+      suptDetermination:'If the student has completed all CDOS credential requirements but cannot achieve passing Regents scores even with all safety nets and appeals, the counselor compiles the CDOS portfolio, all exam records, and all intervention documentation for superintendent review.'
+    },
+    // CDOS Decision Diamond
+    { id:'cdos_decision', label:'All 4 Core\nRegents ≥ 65?', shortLabel:'All 4 Core Regents ≥ 65?', icon:'❓', type:'Decision', tier:2.5, color:'#b45309', textColor:'#fff', filter:'cdos',
+      x:1420, y:490, w:180, h:80, shape:'diamond',
+      requirements:['Check all 4 core Regents exam scores','ELA Regents — is score ≥ 65?','Math Regents — is score ≥ 65?','Science Regents — is score ≥ 65?','Social Studies Regents — is score ≥ 65?','YES (all ≥ 65) → Regents Diploma + CDOS','NO (any < 65) → Local Diploma + CDOS'],
+      counselor:['Review all 4 core Regents scores carefully','If all ≥ 65, proceed to Regents Diploma + CDOS','If any < 65, identify which exams need appeal or safety net','Document the decision and routing'],
+      regulation:'CR 100.5(a)(5)(i), 100.5(d)(7)',
+      notes:'This decision diamond determines the diploma type. The CDOS Credential is the same regardless — only Regents scores differ between branches.'
+    },
+    // Branch A: Regents Diploma + CDOS
+    { id:'cdos_regents', label:'Regents Diploma\n+ CDOS Credential', shortLabel:'Regents Diploma + CDOS', icon:'🎓💼', type:'Pathway Branch', tier:3, color:'#2563eb', textColor:'#fff', filter:'cdos',
+      x:1200, y:650, w:240, h:64, shape:'rect',
+      extraFilters:['regents'],
+      requirements:['44 NYC DOE credits','All 4 core Regents ≥ 65','CDOS Commencement Credential (Option 1 or 2)','No 5th Regents exam required — CDOS serves as +1'],
+      counselor:['Confirm all 4 core scores are 65+','Verify CDOS credential documentation is complete','Note "CDOS Commencement Credential" on transcript','Track 44 credits toward completion','Finalize employability profile and career plan'],
+      regulation:'CR 100.5(b)(7)(iv)',
+      notes:'Student passed all 4 core Regents at ≥65 and completed the CDOS Credential as the +1 pathway. Earns a full Regents Diploma with CDOS Credential on transcript.',
+      suptDetermination:'If the student earned the CDOS credential but one or more core Regents scores remain below 65 after all appeals, the counselor may present the full case to the superintendent for a discretionary Regents or Local diploma.'
+    },
+    // Branch B: Local Diploma + CDOS
+    { id:'cdos_local', label:'Local Diploma\n+ CDOS Credential', shortLabel:'Local Diploma + CDOS', icon:'📜💼', type:'Pathway Branch', tier:3, color:'#0d9488', textColor:'#fff', filter:'cdos',
+      extraFilters:['local'],
+      x:1530, y:650, w:240, h:64, shape:'rect',
+      requirements:['44 NYC DOE credits','At least one core Regents score below 65','Appeal (60–64) or SWD safety net (55–64) or SWD appeal (52–54)','CDOS Commencement Credential (Option 1 or 2)'],
+      counselor:['Identify which exam(s) fell below 65','Initiate appropriate appeal or safety net','Coordinate with special ed director if SWD','Confirm CDOS credential is complete','Note both diploma type and CDOS on transcript'],
+      regulation:'CR 100.5(d)(7)',
+      notes:'Student has at least one core Regents below 65 but qualifies via appeal or SWD safety net. CDOS serves as +1 pathway. Student earns a Local Diploma with CDOS Credential.',
+      suptDetermination:'If the student earned the CDOS credential but cannot meet Local Diploma thresholds even with all safety nets applied, the counselor compiles the CDOS portfolio and all intervention records for superintendent determination.'
+    },
+    // CDOS Stand-Alone
+    { id:'cdos_standalone', label:'CDOS Credential\n(Stand-Alone)', shortLabel:'CDOS Stand-Alone', icon:'⚠️', type:'Exiting Credential', tier:2, color:'#dc2626', textColor:'#fff', filter:'cdos',
+      x:1720, y:340, w:240, h:64, shape:'rect',
+      requirements:['No specific NYC DOE credit floor for stand-alone','Student must have had access to Regents coursework','No Regents exam requirement','CDOS Credential Option 1 or Option 2','Can be awarded alongside any diploma OR as sole exiting credential','Intended for SWD unable to meet diploma standards'],
+      counselor:['Document decision in IEP','Ensure student has access to Regents coursework','Confirm career plan completion','Complete employability profile','Coordinate with special education team','Begin transition planning by age 14'],
+      regulation:'CR 100.6(b), 100.9, NYC DOE A-501',
+      notes:'The stand-alone CDOS Credential is an exiting credential (not a diploma) for students with disabilities unable to meet standard graduation requirements despite good-faith effort.',
+      suptDetermination:'A student exiting with only the CDOS Credential may still request a superintendent review if they believe they have demonstrated substantial academic achievement sufficient for a diploma, despite not meeting standard requirements.'
+    },
+    // TIER 3 — Special Populations
+    { id:'ell', label:'MNE / ELL\nAccommodations', shortLabel:'ELL/MNE Pathway', icon:'🌐', type:'Special Population', tier:3, color:'#16a34a', textColor:'#fff', filter:'ell',
+      x:80, y:520, w:530, h:64, shape:'rect',
+      requirements:['Recently arrived ELLs: entered US in grade 9+, still identified as ELL','May substitute Native Language Arts for ELA Regents','May substitute ESL assessment for ELA Regents','ELL-specific ELA Appeal: Score 55–59 on ELA → appeal eligible','LOTE exemption: native language proficiency counts','All other diploma requirements still apply (44 credits)'],
+      counselor:['Determine ELL status at enrollment','Document US entry date precisely','Schedule bilingual/native language assessments','Flag for ELA appeal eligibility if score 55–59','Confirm LOTE exemption eligibility','Coordinate with ENL/bilingual department'],
+      regulation:'CR 100.5(d)(10), Part 154',
+      notes:'MNE (Multilingual/ELL) students have specific accommodations and alternative assessment options. Proper documentation of entry date and ELL status is essential. All 44 NYC DOE credit requirements still apply.',
+      suptDetermination:'If the student has used every available ELL accommodation (native language substitution, LOTE exemption, ELA appeal at 55–59) and still cannot meet diploma requirements, the counselor documents language acquisition history, entry date, all exam attempts, and all services provided, then refers to the superintendent.'
+    },
+    { id:'swd', label:'SWD / ISS Safety Nets\n(Students w/ Disabilities)', shortLabel:'SWD / ISS Safety Nets', icon:'🛡️', type:'Special Population', tier:3, color:'#9333ea', textColor:'#fff', filter:'swd',
+      x:680, y:520, w:430, h:64, shape:'rect',
+      requirements:['Low Pass Safety Net: Score 55–64 → Local Diploma','Compensatory Score: Average of passed Regents (≥65) substitutes for failed','SWD Low-Pass Appeal: Score 52–54 → appeal for Local Diploma','Must have current IEP','All safety nets apply to Local Diploma only','All 44 NYC DOE credit requirements still apply'],
+      counselor:['Review IEP to determine applicable safety nets','Track all exam attempts and scores','Determine which safety net yields best outcome','Initiate appeal process early in senior year','Coordinate with special education director','Document all academic interventions','Calculate compensatory score when applicable'],
+      regulation:'CR 100.5(d)(7)(i), 100.5(d)(10)',
+      notes:'Three distinct safety net options for SWD. They can be combined. The compensatory score uses the average of all Regents exams scored ≥65 to substitute for a failed exam. 44 credits still required.',
+      suptDetermination:'After the Low-Pass Safety Net (55–64), SWD Low-Pass Appeal (52–54), and Compensatory Scoring have all been exhausted without success, the counselor coordinates with the special education director and refers the case to the superintendent as the final option.'
+    },
+    // TIER 4 — Appeals
+    { id:'appeals', label:'Appeals Hub\n(All Types)', shortLabel:'Appeals Hub', icon:'📝', type:'Appeal', tier:4, color:'#f43f5e', textColor:'#fff', filter:'appeals',
+      x:120, y:710, w:480, h:64, shape:'rect',
+      requirements:['Traditional Appeal: Score 60–64, taken ≥2 times, passed course, teacher rec','Special Appeal (time-limited): Score 50–64 on exams Jun/Aug 2022–Aug 2023','ELL Appeal (ELA only): Score 55–59, entered US grade 9+, still ELL','SWD Appeal: Score 52–54, taken ≥2 times, passed course, teacher rec'],
+      counselor:['Track ALL exam attempts in student records','Identify appeal eligibility as scores are released','Collect supporting documentation immediately','Obtain teacher/dept chair recommendation letters','Submit appeal within district timeline','Maintain file of all appeal materials'],
+      regulation:'CR 100.5(d)(7), Commissioner\'s Decisions',
+      notes:'Appeals are a critical safety net. Counselors should proactively identify eligible students rather than waiting for requests. The special appeal for COVID-era exams has specific date ranges.',
+      suptDetermination:'If all appeal types — Traditional, Special, ELL, and SWD — have been denied or deemed ineligible, the superintendent determination is the only remaining pathway to a diploma. The counselor must document every appeal attempt and outcome.'
+    },
+    { id:'compensatory', label:'Compensatory\nScoring (SWD)', shortLabel:'Compensatory Scoring', icon:'🔢', type:'Appeal', tier:4, color:'#d97706', textColor:'#fff', filter:'swd',
+      x:700, y:710, w:350, h:64, shape:'rect',
+      requirements:['Available to SWD with current IEP only','Pursuing Local Diploma only','Average of Regents scores ≥65 substitutes for score below passing','Must still meet all 44 NYC DOE credit requirements','Cannot be used for Regents Diploma'],
+      counselor:['Calculate compensatory average accurately','Verify current IEP documentation','Apply only for Local Diploma candidates','Record calculation method on transcript','Review with special education team'],
+      regulation:'CR 100.5(d)(7)(ii)',
+      notes:'Compensatory scoring allows the average of all Regents exams where the student scored ≥65 to substitute for an exam below passing. 44 NYC DOE credits must still be earned.'
+    },
+    // TIER 5 — Superintendent
+    { id:'superintendent', label:'Superintendent\nDetermination', shortLabel:'Supt. Determination', icon:'🏛️', type:'Last Resort', tier:5, color:'#991b1b', textColor:'#fff', filter:'appeals',
+      x:300, y:910, w:560, h:68, shape:'rect',
+      requirements:['Student cannot meet standard graduation requirements despite good-faith effort','Superintendent reviews: academic record, attendance, documented interventions','Can grant Local Diploma when student has demonstrated substantial achievement','Must document decision with supporting evidence','Revised form available (2025 update)','Major Life Event (MLE) exemption for diploma assessments'],
+      counselor:['Compile complete academic record','Document ALL interventions and attempts','Write counselor recommendation letter','Present case to superintendent with evidence binder','Include: transcripts, attendance, IEP/504, intervention logs, teacher letters','Know the revised Superintendent Determination form','Understand MLE exemption criteria'],
+      regulation:'CR 100.5(d)(8) — Superintendent Discretionary Diploma',
+      notes:'The Superintendent Determination is a last resort for students who have made good-faith efforts but cannot meet standard requirements. The 2025 revision clarifies the process and introduces MLE exemptions.',
+      suptDetermination:'__CHECKLIST__'
+    },
+    // TIER 6 — Outcomes
+    { id:'out_regents', label:'Regents\nDiploma', shortLabel:'Regents Diploma', icon:'🎓', type:'Outcome', tier:6, color:'#2563eb', textColor:'#fff', filter:'regents',
+      x:60, y:1130, w:200, h:60, shape:'hexagon',
+      requirements:['44 credits (NYC DOE) + 5 Regents exams ≥65','Standard diploma for college-bound students','Accepted by all SUNY/CUNY institutions'],
+      counselor:['Verify all 5 exams passed at ≥65','Confirm 44 credits on transcript','Process diploma order'],
+      regulation:'CR 100.5(a)(5)(i)', notes:'Standard exit credential for most NYC DOE students. 44 credits required.'
+    },
+    { id:'out_advanced', label:'Regents w/\nAdv. Designation', shortLabel:'Adv. Designation Diploma', icon:'🏆', type:'Outcome', tier:6, color:'#7c3aed', textColor:'#fff', filter:'advanced',
+      x:320, y:1130, w:220, h:60, shape:'hexagon',
+      requirements:['44 credits + all Regents requirements + advanced exams','Optional seals: Bilingual, STEM, Arts, CTE, Civic Readiness','Honors endorsement: ≥90% average all Regents'],
+      counselor:['Verify all 8+ Regents passed','Apply applicable seals/endorsements','Process diploma with correct designation'],
+      regulation:'CR 100.5(a)(5)(ii)', notes:'Highest diploma designation. 44 credits required. Seals appear on transcript.'
+    },
+    { id:'out_local', label:'Local\nDiploma', shortLabel:'Local Diploma', icon:'📜', type:'Outcome', tier:6, color:'#0d9488', textColor:'#fff', filter:'local',
+      x:600, y:1130, w:200, h:60, shape:'hexagon',
+      requirements:['44 credits (NYC DOE) + Regents with appeals/safety nets','Valid diploma accepted by colleges and employers','Available through multiple appeal pathways'],
+      counselor:['Confirm all appeals processed','Verify 44-credit completion','Document pathway to Local Diploma'],
+      regulation:'CR 100.5(d)(7)', notes:'A valid NYS diploma. 44 credits required. No indication on the diploma itself distinguishes it from a Regents Diploma.'
+    },
+    { id:'out_cte', label:'Diploma +\nTech. Endorsement', shortLabel:'Diploma + Tech Endorsement', icon:'🔧', type:'Outcome', tier:6, color:'#ea580c', textColor:'#fff', filter:'cte',
+      x:860, y:1130, w:220, h:60, shape:'hexagon',
+      requirements:['Local or Regents Diploma (44 credits)','Technical Endorsement on transcript','Industry certification (if applicable)'],
+      counselor:['Add Technical Endorsement to transcript','Record industry certifications','Connect student with industry partners'],
+      regulation:'CR 100.5(d)(6)', notes:'Technical Endorsement appears on transcript and signals career readiness. 44 credits required.'
+    },
+    { id:'out_cdos_regents', label:'Regents Diploma\n+ CDOS', shortLabel:'Regents Diploma + CDOS', icon:'🎓💼', type:'Outcome', tier:6, color:'#2563eb', textColor:'#fff', filter:'cdos',
+      extraFilters:['regents'],
+      x:1140, y:1130, w:220, h:60, shape:'hexagon',
+      requirements:['Regents Diploma (44 credits, all 4 core Regents ≥65)','CDOS Commencement Credential on transcript','Career plan + employability profile complete'],
+      counselor:['Verify all 4 core Regents ≥65','Verify CDOS credential requirements met','Add CDOS credential to transcript'],
+      regulation:'CR 100.5(b)(7)(iv), 100.6(b)', notes:'Regents Diploma with CDOS Credential. Student used CDOS as +1 pathway. 44 credits required.'
+    },
+    { id:'out_cdos_local', label:'Local Diploma\n+ CDOS', shortLabel:'Local Diploma + CDOS', icon:'📜💼', type:'Outcome', tier:6, color:'#0d9488', textColor:'#fff', filter:'cdos',
+      extraFilters:['local'],
+      x:1420, y:1130, w:220, h:60, shape:'hexagon',
+      requirements:['Local Diploma (44 credits, appeal/safety net for Regents < 65)','CDOS Commencement Credential on transcript','Appeal or safety net documentation on file'],
+      counselor:['Confirm all appeals/safety nets processed','Verify CDOS credential requirements met','Add CDOS credential to transcript'],
+      regulation:'CR 100.5(d)(7), 100.6(b)', notes:'Local Diploma with CDOS Credential. Student had at least one Regents below 65 (via appeal/safety net). 44 credits required.'
+    },
+    { id:'out_standalone', label:'CDOS Credential\n(Stand-Alone)', shortLabel:'CDOS Stand-Alone Exit', icon:'⚠️', type:'Outcome', tier:6, color:'#dc2626', textColor:'#fff', filter:'cdos',
+      x:1700, y:1130, w:220, h:60, shape:'hexagon',
+      requirements:['CDOS Commencement Credential only','Not a diploma — an exiting credential','For SWD who cannot meet diploma standards','Documented in IEP'],
+      counselor:['Ensure IEP documents credential as exit plan','Complete all CDOS credential components','Coordinate transition services','Connect with adult services'],
+      regulation:'CR 100.6(b), 100.9', notes:'Stand-alone credential for SWD. No specific NYC DOE credit floor required.'
+    },
+  ];
+
+  // CONNECTIONS
+  const CONNECTIONS = [
+    ['start','credits','#6b7280','arrow-gray'],
+    ['credits','regents','#2563eb','arrow-blue'],
+    ['credits','advanced','#7c3aed','arrow-purple'],
+    ['credits','local','#0d9488','arrow-teal'],
+    ['credits','cte','#ea580c','arrow-orange'],
+    ['credits','cdos','#d97706','arrow-amber'],
+    ['credits','cdos_standalone','#dc2626','arrow-red'],
+    ['cdos','cdos_decision','#d97706','arrow-amber'],
+    ['cdos_decision','cdos_regents','#2563eb','arrow-blue','YES'],
+    ['cdos_decision','cdos_local','#0d9488','arrow-teal','NO'],
+    ['regents','ell','#16a34a','arrow-green'],
+    ['local','ell','#16a34a','arrow-green'],
+    ['regents','swd','#9333ea','arrow-swd'],
+    ['local','swd','#9333ea','arrow-swd'],
+    ['advanced','swd','#9333ea','arrow-swd'],
+    ['ell','appeals','#f43f5e','arrow-appeals'],
+    ['swd','appeals','#f43f5e','arrow-appeals'],
+    ['swd','compensatory','#d97706','arrow-amber'],
+    ['local','appeals','#f43f5e','arrow-appeals'],
+    ['regents','appeals','#f43f5e','arrow-appeals'],
+    ['appeals','superintendent','#991b1b','arrow-maroon'],
+    ['compensatory','superintendent','#991b1b','arrow-maroon'],
+    ['regents','out_regents','#2563eb','arrow-blue'],
+    ['advanced','out_advanced','#7c3aed','arrow-purple'],
+    ['local','out_local','#0d9488','arrow-teal'],
+    ['appeals','out_local','#0d9488','arrow-teal'],
+    ['cte','out_cte','#ea580c','arrow-orange'],
+    ['cdos_regents','out_cdos_regents','#2563eb','arrow-blue'],
+    ['cdos_local','out_cdos_local','#0d9488','arrow-teal'],
+    ['cdos_standalone','out_standalone','#dc2626','arrow-red'],
+    ['superintendent','out_local','#991b1b','arrow-maroon'],
+    ['compensatory','out_local','#0d9488','arrow-teal'],
+  ];
+
+  // Dashed fallback arrows from CDOS nodes to Superintendent
+  const DASHED_CONNECTIONS = [
+    { from:'cdos', to:'superintendent', label:'⚠️ All options exhausted', laneX: 2150 },
+    { from:'cdos_standalone', to:'superintendent', label:'⚠️ Seeks diploma\nconsideration', laneX: 2310 },
+  ];
+
+  // ===== STATE =====
+  let reviewedNodes = new Set();
+  try { const saved = localStorage.getItem('nys-cdos-reviewed'); if(saved) reviewedNodes = new Set(JSON.parse(saved)); } catch(e){}
+  let currentFilter = 'all';
+  let searchTerm = '';
+  let tipsVisible = false;
+  let darkMode = false;
+  let selectedNodeId = null;
+
+  // ===== PAN/ZOOM =====
+  let viewBox = { x: 0, y: 0, w: 3200, h: 2000 };
+  let isPanning = false, panStart = {x:0,y:0}, vbStart = {x:0,y:0};
+  const svg = document.getElementById('flowchart-svg');
+
+  function updateViewBox() {
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+  }
+  function zoomBy(factor) {
+    const cx = viewBox.x + viewBox.w/2, cy = viewBox.y + viewBox.h/2;
+    viewBox.w *= factor; viewBox.h *= factor;
+    viewBox.x = cx - viewBox.w/2; viewBox.y = cy - viewBox.h/2;
+    updateViewBox();
+  }
+  function fitToScreen() {
+    viewBox = { x: -40, y: -10, w: 2260, h: 1300 };
+    updateViewBox();
+  }
+  function resetView() {
+    viewBox = { x: 0, y: 0, w: 3200, h: 2000 };
+    updateViewBox();
+  }
+
+  // ===== DRAW CONNECTIONS =====
+  function drawConnections() {
+    const layer = document.getElementById('connections-layer');
+    layer.innerHTML = '';
+
+    // Regular solid connections
+    CONNECTIONS.forEach(([fromId, toId, color, arrowId, label]) => {
+      const from = NODES.find(n => n.id === fromId);
+      const to = NODES.find(n => n.id === toId);
+      if (!from || !to) return;
+
+      let fx = from.x + from.w/2, fy = from.y + from.h;
+      let tx = to.x + to.w/2, ty = to.y;
+
+      if (from.shape === 'diamond') { fx = from.x + from.w/2; fy = from.y + from.h; }
+      if (to.shape === 'diamond') { tx = to.x + to.w/2; ty = to.y; }
+
+      if (fromId === 'cdos_decision' && label === 'YES') {
+        fx = from.x; fy = from.y + from.h/2;
+        tx = to.x + to.w/2; ty = to.y;
+      } else if (fromId === 'cdos_decision' && label === 'NO') {
+        fx = from.x + from.w; fy = from.y + from.h/2;
+        tx = to.x + to.w/2; ty = to.y;
+      }
+
+      const dy = ty - fy;
+      let pathD;
+
+      if (fromId === 'cdos_decision' && (label === 'YES' || label === 'NO')) {
+        const midY = fy + Math.abs(ty - fy) * 0.5;
+        pathD = `M ${fx} ${fy} L ${fx + (label === 'YES' ? -40 : 40)} ${fy} C ${tx} ${fy}, ${tx} ${midY}, ${tx} ${ty}`;
+      } else {
+        const cp1y = fy + dy * 0.4;
+        const cp2y = ty - dy * 0.4;
+        pathD = `M ${fx} ${fy} C ${fx} ${cp1y}, ${tx} ${cp2y}, ${tx} ${ty}`;
+      }
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-opacity', '0.55');
+      path.setAttribute('marker-end', `url(#${arrowId})`);
+      path.dataset.from = fromId;
+      path.dataset.to = toId;
+      layer.appendChild(path);
+
+      // YES/NO labels with white background pill
+      if (label === 'YES' || label === 'NO') {
+        const labelG = document.createElementNS('http://www.w3.org/2000/svg','g');
+        const lx = label === 'YES' ? fx - 55 : fx + 55;
+        const ly = fy - 6;
+
+        const labelRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        labelRect.setAttribute('x', lx - 22);
+        labelRect.setAttribute('y', ly - 10);
+        labelRect.setAttribute('width', 44);
+        labelRect.setAttribute('height', 20);
+        labelRect.setAttribute('rx', 10);
+        labelRect.setAttribute('fill', '#ffffff');
+        labelRect.setAttribute('fill-opacity', '0.95');
+        labelRect.setAttribute('stroke', label === 'YES' ? '#16a34a' : '#f43f5e');
+        labelRect.setAttribute('stroke-width', '1');
+        labelG.appendChild(labelRect);
+
+        const labelText = document.createElementNS('http://www.w3.org/2000/svg','text');
+        labelText.setAttribute('x', lx);
+        labelText.setAttribute('y', ly + 3);
+        labelText.setAttribute('text-anchor', 'middle');
+        labelText.setAttribute('fill', label === 'YES' ? '#16a34a' : '#dc2626');
+        labelText.setAttribute('font-size', '10');
+        labelText.setAttribute('font-weight', '700');
+        labelText.setAttribute('font-family', 'Inter, sans-serif');
+        labelText.textContent = label;
+        labelG.appendChild(labelText);
+        layer.appendChild(labelG);
+      }
+    });
+
+    // Dashed fallback arrows from CDOS nodes to Superintendent
+    DASHED_CONNECTIONS.forEach((dc) => {
+      const from = NODES.find(n => n.id === dc.from);
+      const to = NODES.find(n => n.id === dc.to);
+      if (!from || !to) return;
+
+      // Start from the right edge of the source node
+      const fx = from.x + from.w;
+      const fy = from.shape === 'diamond' ? from.y + from.h / 2 : from.y + from.h / 2;
+      // End at the right edge of the superintendent node
+      const tx = to.x + to.w;
+      const ty = to.y + to.h / 2;
+      const laneX = dc.laneX;
+
+      // Elbow path: right from node → down along lane → left into superintendent
+      const pathD = `M ${fx} ${fy} L ${laneX} ${fy} L ${laneX} ${ty} L ${tx + 12} ${ty}`;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('stroke', '#8B0000');
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('stroke-dasharray', '8,5');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-opacity', '0.7');
+      path.setAttribute('marker-end', 'url(#arrow-maroon-dash)');
+      path.dataset.from = dc.from;
+      path.dataset.to = dc.to;
+      path.classList.add('dashed-fallback');
+      layer.appendChild(path);
+
+      // Label on vertical segment with white pill background
+      const labelLines = dc.label.split('\n');
+      const labelMidY = (fy + ty) / 2;
+      const labelG = document.createElementNS('http://www.w3.org/2000/svg','g');
+
+      const pillW = 140;
+      const pillH = labelLines.length * 16 + 14;
+      const pillX = laneX - pillW / 2;
+      const pillY = labelMidY - pillH / 2;
+
+      const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      bg.setAttribute('x', pillX);
+      bg.setAttribute('y', pillY);
+      bg.setAttribute('width', pillW);
+      bg.setAttribute('height', pillH);
+      bg.setAttribute('rx', 8);
+      bg.setAttribute('fill', '#ffffff');
+      bg.setAttribute('fill-opacity', '0.95');
+      bg.setAttribute('stroke', '#8B0000');
+      bg.setAttribute('stroke-width', '0.8');
+      labelG.appendChild(bg);
+
+      labelLines.forEach((line, i) => {
+        const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x', laneX);
+        t.setAttribute('y', pillY + 14 + i * 14);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('fill', '#8B0000');
+        t.setAttribute('font-size', '9');
+        t.setAttribute('font-weight', '600');
+        t.setAttribute('font-family', 'Inter, sans-serif');
+        t.textContent = line;
+        labelG.appendChild(t);
+      });
+
+      layer.appendChild(labelG);
+    });
+  }
+
+  // ===== DRAW NODES =====
+  function drawNodes() {
+    const layer = document.getElementById('nodes-layer');
+    layer.innerHTML = '';
+
+    drawLegendOnSVG(layer);
+
+    NODES.forEach(node => {
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.classList.add('node-group');
+      g.dataset.id = node.id;
+      g.dataset.filter = node.filter;
+      if (node.extraFilters) g.dataset.extraFilters = node.extraFilters.join(',');
+
+      let shape;
+      if (node.shape === 'hexagon') {
+        shape = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        shape.setAttribute('points', hexPoints(node.x, node.y, node.w, node.h));
+        shape.setAttribute('fill', node.color);
+        shape.setAttribute('stroke', darken(node.color, 0.2));
+        shape.setAttribute('stroke-width', '1.5');
+      } else if (node.shape === 'diamond') {
+        const cx = node.x + node.w/2, cy = node.y + node.h/2;
+        shape = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        shape.setAttribute('points', `${cx},${node.y} ${node.x + node.w},${cy} ${cx},${node.y + node.h} ${node.x},${cy}`);
+        shape.setAttribute('fill', node.color);
+        shape.setAttribute('stroke', darken(node.color, 0.2));
+        shape.setAttribute('stroke-width', '2');
+      } else {
+        shape = document.createElementNS('http://www.w3.org/2000/svg','rect');
+        shape.setAttribute('x', node.x);
+        shape.setAttribute('y', node.y);
+        shape.setAttribute('width', node.w);
+        shape.setAttribute('height', node.h);
+        shape.setAttribute('rx', node.shape === 'rounded' ? 30 : 12);
+        shape.setAttribute('fill', node.color);
+        shape.setAttribute('stroke', darken(node.color, 0.15));
+        shape.setAttribute('stroke-width', '1.5');
+      }
+      shape.classList.add('node-rect');
+      shape.setAttribute('filter', 'url(#shadow)');
+      g.appendChild(shape);
+
+      // Label
+      const lines = node.label.split('\n');
+      const cx = node.x + node.w/2;
+      const lineH = node.shape === 'diamond' ? 13 : 15;
+      const baseY = node.y + (node.h/2) - ((lines.length - 1) * lineH/2) + 1;
+
+      // Icon for non-diamond shapes
+      if (node.shape !== 'diamond') {
+        const iconText = document.createElementNS('http://www.w3.org/2000/svg','text');
+        iconText.setAttribute('x', node.x + 12);
+        iconText.setAttribute('y', node.y + node.h/2 + 5);
+        iconText.setAttribute('font-size', '15');
+        iconText.textContent = node.icon;
+        g.appendChild(iconText);
+      }
+
+      const fontSize = node.shape === 'diamond' ? '10' : '12';
+      lines.forEach((line, i) => {
+        const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x', cx + (node.shape === 'diamond' ? 0 : 8));
+        t.setAttribute('y', baseY + i * lineH + 4);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('fill', node.textColor);
+        t.setAttribute('font-size', fontSize);
+        t.setAttribute('font-weight', '600');
+        t.setAttribute('font-family', 'Inter, sans-serif');
+        t.textContent = line;
+        g.appendChild(t);
+      });
+
+      // Reviewed badge
+      const badge = document.createElementNS('http://www.w3.org/2000/svg','g');
+      badge.classList.add('reviewed-badge');
+      badge.style.display = 'none';
+      const bc = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      bc.setAttribute('cx', node.x + node.w - 8);
+      bc.setAttribute('cy', node.y + 8);
+      bc.setAttribute('r', '9');
+      bc.setAttribute('fill', '#16a34a');
+      bc.setAttribute('stroke', '#fff');
+      bc.setAttribute('stroke-width', '2');
+      badge.appendChild(bc);
+      const bt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      bt.setAttribute('x', node.x + node.w - 8);
+      bt.setAttribute('y', node.y + 12);
+      bt.setAttribute('text-anchor', 'middle');
+      bt.setAttribute('fill', '#fff');
+      bt.setAttribute('font-size', '11');
+      bt.setAttribute('font-weight', '700');
+      bt.textContent = '✓';
+      badge.appendChild(bt);
+      g.appendChild(badge);
+      if (reviewedNodes.has(node.id)) {
+        g.classList.add('node-reviewed');
+        badge.style.display = 'block';
+      }
+
+      // Counselor tip overlay
+      const tip = document.createElementNS('http://www.w3.org/2000/svg','g');
+      tip.classList.add('tip-overlay');
+      const tipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      tipRect.setAttribute('x', node.x + node.w - 44);
+      tipRect.setAttribute('y', node.y - 10);
+      tipRect.setAttribute('width', 52);
+      tipRect.setAttribute('height', 18);
+      tipRect.setAttribute('rx', 9);
+      tipRect.setAttribute('fill', '#fef3c7');
+      tipRect.setAttribute('stroke', '#d97706');
+      tipRect.setAttribute('stroke-width', '1');
+      tip.appendChild(tipRect);
+      const tipT = document.createElementNS('http://www.w3.org/2000/svg','text');
+      tipT.setAttribute('x', node.x + node.w - 18);
+      tipT.setAttribute('y', node.y + 2);
+      tipT.setAttribute('text-anchor', 'middle');
+      tipT.setAttribute('fill', '#92400e');
+      tipT.setAttribute('font-size', '9');
+      tipT.setAttribute('font-weight', '600');
+      tipT.textContent = '👩‍🏫 Tip';
+      tip.appendChild(tipT);
+      g.appendChild(tip);
+
+      layer.appendChild(g);
+    });
+  }
+
+  // Legend on SVG
+  function drawLegendOnSVG(layer) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('transform', 'translate(2000, 870)');
+
+    const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    bg.setAttribute('x', 0); bg.setAttribute('y', 0);
+    bg.setAttribute('width', 520); bg.setAttribute('height', 105);
+    bg.setAttribute('rx', 12); bg.setAttribute('fill', '#fffbf8');
+    bg.setAttribute('fill-opacity', '0.95');
+    bg.setAttribute('stroke', '#cfc9c5'); bg.setAttribute('stroke-width', '1');
+    g.appendChild(bg);
+
+    const title = document.createElementNS('http://www.w3.org/2000/svg','text');
+    title.setAttribute('x', 15); title.setAttribute('y', 20);
+    title.setAttribute('font-size', '11'); title.setAttribute('font-weight', '700');
+    title.setAttribute('fill', '#272320'); title.setAttribute('font-family', 'Inter, sans-serif');
+    title.textContent = 'LEGEND';
+    g.appendChild(title);
+
+    const items = [
+      ['#2563eb','Regents','circle'], ['#7c3aed','Adv. Desig.','circle'], ['#0d9488','Local','circle'],
+      ['#ea580c','CTE','circle'], ['#d97706','CDOS','circle'], ['#dc2626','Stand-Alone','circle'],
+      ['#16a34a','ELL','circle'], ['#9333ea','SWD','circle'], ['#f43f5e','Appeals','circle'], ['#991b1b','Supt.','circle']
+    ];
+    items.forEach((item, i) => {
+      const col = i % 5;
+      const row = Math.floor(i / 5);
+      const ix = 15 + col * 90;
+      const iy = 40 + row * 20;
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', ix); dot.setAttribute('cy', iy);
+      dot.setAttribute('r', '4'); dot.setAttribute('fill', item[0]);
+      g.appendChild(dot);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', ix + 8); t.setAttribute('y', iy + 3);
+      t.setAttribute('font-size', '9'); t.setAttribute('fill', '#5a544f');
+      t.setAttribute('font-family', 'Inter, sans-serif');
+      t.textContent = item[1];
+      g.appendChild(t);
+    });
+
+    // Dashed line legend entry
+    const dashY = 80;
+    const dashLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+    dashLine.setAttribute('x1', 15); dashLine.setAttribute('y1', dashY);
+    dashLine.setAttribute('x2', 45); dashLine.setAttribute('y2', dashY);
+    dashLine.setAttribute('stroke', '#8B0000'); dashLine.setAttribute('stroke-width', '2');
+    dashLine.setAttribute('stroke-dasharray', '6,3');
+    g.appendChild(dashLine);
+    const dashArrow = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    dashArrow.setAttribute('points', `45,${dashY-3} 51,${dashY} 45,${dashY+3}`);
+    dashArrow.setAttribute('fill', '#8B0000');
+    g.appendChild(dashArrow);
+    const dashText = document.createElementNS('http://www.w3.org/2000/svg','text');
+    dashText.setAttribute('x', 56); dashText.setAttribute('y', dashY + 3);
+    dashText.setAttribute('font-size', '9'); dashText.setAttribute('fill', '#8B0000');
+    dashText.setAttribute('font-weight', '600');
+    dashText.setAttribute('font-family', 'Inter, sans-serif');
+    dashText.textContent = '⚠️ CDOS Fallback to Superintendent Determination';
+    g.appendChild(dashText);
+
+    layer.appendChild(g);
+  }
+
+  function hexPoints(x, y, w, h) {
+    const indent = 18;
+    return `${x+indent},${y} ${x+w-indent},${y} ${x+w},${y+h/2} ${x+w-indent},${y+h} ${x+indent},${y+h} ${x},${y+h/2}`;
+  }
+  function darken(hex, amt) {
+    let r = parseInt(hex.slice(1,3),16), g2 = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    r = Math.max(0, Math.round(r*(1-amt))); g2 = Math.max(0, Math.round(g2*(1-amt))); b = Math.max(0, Math.round(b*(1-amt)));
+    return `#${r.toString(16).padStart(2,'0')}${g2.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+  }
+
+  // ===== SIDEBAR =====
+  function openSidebar(nodeId) {
+    const node = NODES.find(n => n.id === nodeId);
+    if (!node) return;
+    selectedNodeId = nodeId;
+    document.getElementById('sidebar-title').textContent = node.shortLabel;
+    document.getElementById('sidebar-icon').textContent = node.icon;
+    const badge = document.getElementById('sidebar-badge');
+    badge.textContent = node.type;
+    badge.style.background = node.color + '22';
+    badge.style.color = node.color;
+
+    const reqList = document.getElementById('sidebar-requirements');
+    reqList.innerHTML = '';
+    node.requirements.forEach(r => {
+      const li = document.createElement('li');
+      li.className = 'flex items-start gap-1.5 text-sm';
+      li.innerHTML = '<span class="text-foreground-400 flex-shrink-0 mt-0.5">☐</span><span>' + escHTML(r) + '</span>';
+      reqList.appendChild(li);
+    });
+
+    const couList = document.getElementById('sidebar-counselor');
+    couList.innerHTML = '';
+    node.counselor.forEach(c => {
+      const li = document.createElement('li');
+      li.className = 'flex items-start gap-1.5 text-sm';
+      li.innerHTML = '<span class="text-accent-450 flex-shrink-0 mt-0.5">•</span><span>' + escHTML(c) + '</span>';
+      couList.appendChild(li);
+    });
+
+    document.getElementById('sidebar-regulation').textContent = node.regulation;
+    document.getElementById('sidebar-notes').textContent = node.notes;
+
+    const suptSection = document.getElementById('sidebar-supt-section');
+    const suptContent = document.getElementById('sidebar-supt-content');
+    if (node.suptDetermination) {
+      suptSection.style.display = 'block';
+      if (node.suptDetermination === '__CHECKLIST__') {
+        suptContent.innerHTML = `
+          <p style="margin-bottom:8px;">The following documentation must be compiled for superintendent review:</p>
+          <ul>
+            <li>☐ Complete academic transcript (all 4 years)</li>
+            <li>☐ Documentation of all Regents exam attempts and scores</li>
+            <li>☐ Documentation of all appeals filed and outcomes</li>
+            <li>☐ Documentation of all safety nets applied</li>
+            <li>☐ Record of all academic interventions provided</li>
+            <li>☐ Counselor formal recommendation letter</li>
+            <li>☐ Special education director sign-off (if SWD)</li>
+            <li>☐ CDOS portfolio (if applicable)</li>
+          </ul>
+        `;
+      } else {
+        suptContent.innerHTML = '<p>' + escHTML(node.suptDetermination) + '</p>';
+      }
+    } else {
+      suptSection.style.display = 'none';
+      suptContent.innerHTML = '';
+    }
+
+    const btn = document.getElementById('mark-reviewed-btn');
+    if (reviewedNodes.has(nodeId)) {
+      btn.innerHTML = '<span>✓ Reviewed</span>';
+      btn.classList.add('bg-green-600'); btn.classList.remove('bg-accent-450','hover:bg-accent-550');
+    } else {
+      btn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Mark as Reviewed';
+      btn.classList.remove('bg-green-600'); btn.classList.add('bg-accent-450','hover:bg-accent-550');
+      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+    document.getElementById('sidebar').classList.add('sidebar-open');
+  }
+
+  function escHTML(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('sidebar-open');
+    selectedNodeId = null;
+  }
+
+  function markReviewed() {
+    if (!selectedNodeId) return;
+    reviewedNodes.add(selectedNodeId);
+    try { localStorage.setItem('nys-cdos-reviewed', JSON.stringify([...reviewedNodes])); } catch(e){}
+    const g = document.querySelector(`.node-group[data-id="${selectedNodeId}"]`);
+    if (g) {
+      g.classList.add('node-reviewed');
+      const badge = g.querySelector('.reviewed-badge');
+      if (badge) badge.style.display = 'block';
+    }
+    openSidebar(selectedNodeId);
+  }
+
+  // ===== SEARCH =====
+  function applySearch(term) {
+    searchTerm = term.toLowerCase();
+    document.querySelectorAll('.node-group').forEach(g => {
+      const node = NODES.find(n => n.id === g.dataset.id);
+      if (!node) return;
+      const text = (node.label + ' ' + node.shortLabel + ' ' + node.requirements.join(' ') + ' ' + node.counselor.join(' ') + ' ' + node.notes + ' ' + (node.suptDetermination || '')).toLowerCase();
+      if (searchTerm && text.includes(searchTerm)) {
+        g.classList.add('node-highlight','search-match');
+      } else {
+        g.classList.remove('node-highlight','search-match');
+      }
+    });
+    document.querySelectorAll('.mobile-card').forEach(card => {
+      const node = NODES.find(n => n.id === card.dataset.id);
+      if (!node) return;
+      const text = (node.label + ' ' + node.shortLabel + ' ' + node.requirements.join(' ') + ' ' + node.counselor.join(' ') + ' ' + node.notes + ' ' + (node.suptDetermination || '')).toLowerCase();
+      card.style.boxShadow = (searchTerm && text.includes(searchTerm)) ? '0 0 0 3px #facc15' : '';
+    });
+  }
+
+  // ===== FILTER =====
+  function applyFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.filter === filter);
+      b.style.fontWeight = b.dataset.filter === filter ? '700' : '400';
+      b.style.outline = b.dataset.filter === filter ? '2px solid ' + b.style.color : 'none';
+    });
+    document.querySelectorAll('.node-group').forEach(g => {
+      const nf = g.dataset.filter;
+      const ef = g.dataset.extraFilters ? g.dataset.extraFilters.split(',') : [];
+      const show = filter === 'all' || nf === filter || nf === 'all' || ef.includes(filter);
+      g.style.opacity = show ? '1' : '0.15';
+      g.style.pointerEvents = show ? 'auto' : 'none';
+    });
+    document.querySelectorAll('#connections-layer path').forEach(p => {
+      const fn = NODES.find(n => n.id === p.dataset.from);
+      const tn = NODES.find(n => n.id === p.dataset.to);
+      const fm = fn && (fn.filter === filter || fn.filter === 'all' || (fn.extraFilters && fn.extraFilters.includes(filter)));
+      const tm = tn && (tn.filter === filter || tn.filter === 'all' || (tn.extraFilters && tn.extraFilters.includes(filter)));
+      p.style.opacity = (filter === 'all' || fm || tm) ? '0.55' : '0.07';
+    });
+    document.querySelectorAll('.mobile-card').forEach(card => {
+      const cf = card.dataset.filter;
+      const ef = card.dataset.extraFilters ? card.dataset.extraFilters.split(',') : [];
+      card.style.display = (filter === 'all' || cf === filter || cf === 'all' || ef.includes(filter)) ? 'block' : 'none';
+    });
+  }
+
+  // ===== TOOLTIP =====
+  function showTooltip(nodeId, evt) {
+    const node = NODES.find(n => n.id === nodeId);
+    if (!node) return;
+    const tip = document.getElementById('tooltip');
+    tip.innerHTML = `<strong>${node.icon} ${node.shortLabel}</strong><br><span style="color:#746d68;font-size:12px;">${node.type}</span><br><span style="font-size:12px;">Click for full details</span>`;
+    tip.classList.add('visible');
+    positionTooltip(evt);
+  }
+  function positionTooltip(evt) {
+    const tip = document.getElementById('tooltip');
+    let x = evt.clientX + 16, y = evt.clientY + 10;
+    if (x + 330 > window.innerWidth) x = evt.clientX - 340;
+    if (y + 80 > window.innerHeight) y = evt.clientY - 80;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function hideTooltip() { document.getElementById('tooltip').classList.remove('visible'); }
+
+  // ===== MOBILE LIST =====
+  function buildMobileList() {
+    const container = document.getElementById('mobile-list');
+    container.innerHTML = '';
+    const tiers = [0,1,2,2.5,3,4,5,6];
+    const tierNames = ['Entry','Core Requirements','Pathway Selection','CDOS Decision','Special Populations & CDOS Branches','Appeals & Compensatory','Superintendent Determination','Outcomes'];
+    tiers.forEach((tier,i) => {
+      const tierNodes = NODES.filter(n => n.tier === tier);
+      if (!tierNodes.length) return;
+      const heading = document.createElement('h3');
+      heading.className = 'text-xs font-bold uppercase tracking-wider text-foreground-450 mb-2 mt-4';
+      heading.textContent = tierNames[i];
+      container.appendChild(heading);
+      tierNodes.forEach(node => {
+        const card = document.createElement('div');
+        card.className = 'mobile-card p-4 rounded-2xl bg-background-100 mb-2 cursor-pointer border border-stroke-200/20';
+        card.dataset.id = node.id;
+        card.dataset.filter = node.filter;
+        if (node.extraFilters) card.dataset.extraFilters = node.extraFilters.join(',');
+        card.innerHTML = `
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-lg">${node.icon}</span>
+            <span class="font-semibold text-sm" style="color:${node.color}">${node.shortLabel}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded-full ml-auto" style="background:${node.color}22;color:${node.color}">${node.type}</span>
+            ${reviewedNodes.has(node.id) ? '<span class="text-green-600 text-sm">✓</span>' : ''}
+          </div>
+          <p class="text-xs text-foreground-600 line-clamp-2">${node.requirements.slice(0,2).join(' • ')}</p>
+          ${node.suptDetermination && node.suptDetermination !== '__CHECKLIST__' ? '<p class="text-xs mt-1 italic" style="color:#8b0000;">Supt. Determination info in sidebar →</p>' : ''}
+        `;
+        card.addEventListener('click', () => openSidebar(node.id));
+        container.appendChild(card);
+      });
+    });
+    const footer = document.createElement('div');
+    footer.className = 'py-6 text-center';
+    footer.innerHTML = '<p class="text-xs text-foreground-450">Made by Copilot</p>';
+    container.appendChild(footer);
+  }
+
+  // ===== INIT =====
+  function init() {
+    drawConnections();
+    drawNodes();
+    buildMobileList();
+    fitToScreen();
+
+    document.getElementById('nodes-layer').addEventListener('click', (e) => {
+      const g = e.target.closest('.node-group');
+      if (g) openSidebar(g.dataset.id);
+    });
+
+    document.getElementById('nodes-layer').addEventListener('mouseover', (e) => {
+      const g = e.target.closest('.node-group');
+      if (g) showTooltip(g.dataset.id, e);
+    });
+    document.getElementById('nodes-layer').addEventListener('mousemove', (e) => {
+      if (document.getElementById('tooltip').classList.contains('visible')) positionTooltip(e);
+    });
+    document.getElementById('nodes-layer').addEventListener('mouseout', (e) => {
+      if (e.target.closest('.node-group')) hideTooltip();
+    });
+
+    svg.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.node-group')) return;
+      isPanning = true;
+      panStart = { x: e.clientX, y: e.clientY };
+      vbStart = { x: viewBox.x, y: viewBox.y };
+      svg.style.cursor = 'grabbing';
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      const rect = svg.getBoundingClientRect();
+      viewBox.x = vbStart.x - (e.clientX - panStart.x) * (viewBox.w / rect.width);
+      viewBox.y = vbStart.y - (e.clientY - panStart.y) * (viewBox.h / rect.height);
+      updateViewBox();
+    });
+    window.addEventListener('mouseup', () => { isPanning = false; svg.style.cursor = 'grab'; });
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 1.1 : 0.9;
+      const rect = svg.getBoundingClientRect();
+      const mx = ((e.clientX - rect.left) / rect.width) * viewBox.w + viewBox.x;
+      const my = ((e.clientY - rect.top) / rect.height) * viewBox.h + viewBox.y;
+      viewBox.w *= factor; viewBox.h *= factor;
+      viewBox.x = mx - ((e.clientX - rect.left) / rect.width) * viewBox.w;
+      viewBox.y = my - ((e.clientY - rect.top) / rect.height) * viewBox.h;
+      updateViewBox();
+    }, { passive: false });
+
+    let touchStart = null, touchVbStart = null;
+    svg.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        touchVbStart = { x: viewBox.x, y: viewBox.y };
+      }
+    }, { passive: true });
+    svg.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 1 && touchStart) {
+        const rect = svg.getBoundingClientRect();
+        viewBox.x = touchVbStart.x - (e.touches[0].clientX - touchStart.x) * (viewBox.w / rect.width);
+        viewBox.y = touchVbStart.y - (e.touches[0].clientY - touchStart.y) * (viewBox.h / rect.height);
+        updateViewBox();
+      }
+    }, { passive: true });
+    svg.addEventListener('touchend', () => { touchStart = null; });
+
+    svg.style.cursor = 'grab';
+
+    document.getElementById('zoom-in').addEventListener('click', () => zoomBy(0.8));
+    document.getElementById('zoom-out').addEventListener('click', () => zoomBy(1.25));
+    document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
+    document.getElementById('zoom-reset').addEventListener('click', resetView);
+
+    document.getElementById('sidebar-close').addEventListener('click', closeSidebar);
+    document.getElementById('mark-reviewed-btn').addEventListener('click', markReviewed);
+
+    document.getElementById('search-input').addEventListener('input', (e) => applySearch(e.target.value));
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+    });
+
+    document.getElementById('dark-toggle').addEventListener('click', () => {
+      darkMode = !darkMode;
+      document.body.classList.toggle('dark-mode', darkMode);
+    });
+
+    document.getElementById('tips-toggle').addEventListener('click', () => {
+      tipsVisible = !tipsVisible;
+      document.getElementById('flowchart-svg').classList.toggle('tips-visible', tipsVisible);
+      const btn = document.getElementById('tips-toggle');
+      btn.style.background = tipsVisible ? '#fef3c7' : '';
+      btn.style.color = tipsVisible ? '#92400e' : '';
+    });
+
+    document.getElementById('print-btn').addEventListener('click', () => window.print());
+
+    if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+      lucide.createIcons();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  </script>
+</body>
+</html>
